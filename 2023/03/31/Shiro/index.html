@@ -1,0 +1,733 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Shiro(全系漏洞分析-截至20230331) | ZeanHike</title><meta name="author" content="ZeanHike,774781684@qq.com"><meta name="copyright" content="ZeanHike"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Shiro(全系漏洞分析-截至20230331)概述Apache Shiro是用来做认证和授权的框架，执行身份验证、授权、密码和会话管理。 Shiro主要配合一些容器的使用，如Tomcat、Weblogic等；同时有些框架也会将Shiro集成用来做身份认证和授权，比如：SpringBoot等； Shiro包括几个重要的类：  Subject：项目，表示需要受Shiro保护的项目； Security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Shiro(全系漏洞分析-截至20230331)">
+<meta property="og:url" content="https://cyberikun.github.io/carpet/2023/03/31/Shiro/index.html">
+<meta property="og:site_name" content="ZeanHike">
+<meta property="og:description" content="Shiro(全系漏洞分析-截至20230331)概述Apache Shiro是用来做认证和授权的框架，执行身份验证、授权、密码和会话管理。 Shiro主要配合一些容器的使用，如Tomcat、Weblogic等；同时有些框架也会将Shiro集成用来做身份认证和授权，比如：SpringBoot等； Shiro包括几个重要的类：  Subject：项目，表示需要受Shiro保护的项目； Security">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101021498.png">
+<meta property="article:published_time" content="2023-03-31T10:49:08.000Z">
+<meta property="article:modified_time" content="2023-03-31T10:49:08.000Z">
+<meta property="article:author" content="ZeanHike">
+<meta property="article:tag" content="漏洞分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101021498.png"><link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306091946658.svg"><link rel="canonical" href="https://cyberikun.github.io/carpet/2023/03/31/Shiro/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/carpet/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/carpet/',
+  algolia: undefined,
+  localSearch: {"path":"/carpet/search.xml","preload":true,"top_n_per_article":1,"unescape":true,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'mediumZoom',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Shiro(全系漏洞分析-截至20230331)',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-03-31 18:49:08'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306092351598.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/carpet/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/carpet/tags/"><div class="headline">标签</div><div class="length-num">1</div></a><a href="/carpet/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/carpet/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/carpet/archives/"><i class="fa-fw fas fa-archive"></i><span> 存档</span></a></div><div class="menus_item"><a class="site-page" href="/carpet/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/carpet/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101021498.png')"><nav id="nav"><span id="blog-info"><a href="/carpet/" title="ZeanHike"><img class="site-icon" src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306091946658.svg"/><span class="site-name">ZeanHike</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/carpet/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/carpet/archives/"><i class="fa-fw fas fa-archive"></i><span> 存档</span></a></div><div class="menus_item"><a class="site-page" href="/carpet/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/carpet/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Shiro(全系漏洞分析-截至20230331)</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-03-31T10:49:08.000Z" title="发表于 2023-03-31 18:49:08">2023-03-31</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-03-31T10:49:08.000Z" title="更新于 2023-03-31 18:49:08">2023-03-31</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">7.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>25分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Shiro(全系漏洞分析-截至20230331)"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/carpet/2023/03/31/Shiro/#post-comment"><span class="gitalk-comment-count"><i class="fa-solid fa-spinner fa-spin"></i></span></a></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Shiro-全系漏洞分析-截至20230331"><a href="#Shiro-全系漏洞分析-截至20230331" class="headerlink" title="Shiro(全系漏洞分析-截至20230331)"></a>Shiro(全系漏洞分析-截至20230331)</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>Apache Shiro是用来做认证和授权的框架，执行身份验证、授权、密码和会话管理。</p>
+<p>Shiro主要配合一些容器的使用，如Tomcat、Weblogic等；同时有些框架也会将Shiro集成用来做身份认证和授权，比如：SpringBoot等；</p>
+<p>Shiro包括几个重要的类：</p>
+<ol>
+<li>Subject：项目，表示需要受Shiro保护的项目；</li>
+<li>SecurityManager：安全管理器，管理所有Subject；</li>
+<li>Realm：域，用来访问数据，比如访问数据库中的用户密码以及权限角色等信息，使用该类来完成；</li>
+</ol>
+<p>Shiro存在一些默认的过滤器</p>
+<ul>
+<li>anon：为匿名过滤器</li>
+<li>authc：为登录过滤器</li>
+</ul>
+<p>学习shiro前要了解他的使用和原理，这样也比较好懂他的成因，下面推荐两个文章；</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/learnhow/p/5694876.html">30分钟学会如何使用Shiro</a></li>
+<li><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000013875092">Shiro入门这篇就够了【Shiro的基础知识、回顾URL拦截】</a></li>
+</ul>
+<p>从Shiro诞生之初，到至今一共存在14个漏洞。以下是shiro官网中的漏洞报告：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2023_22602">CVE-2023-22602</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2022_40664">CVE-2022-40664</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2022_32532">CVE-2022-32532</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2021_41303">CVE-2021-41303</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2020_17523">CVE-2020-17523</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2020_17510">CVE-2020-17510</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2020_13933">CVE-2020-13933</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2020_11989">CVE-2020-11989</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2020_1957">CVE-2020-1957</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2019_12422">CVE-2019-12422</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2016_6802">CVE-2016-6802</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2016_4437">CVE-2016-4437</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2014_0074">CVE-2014-0074</a></li>
+<li><a target="_blank" rel="noopener" href="https://shiro.apache.org/security-reports.html#cve_2010_3863">CVE-2010-3863</a></li>
+</ul>
+<h2 id="CVE-2010-3863"><a href="#CVE-2010-3863" class="headerlink" title="CVE-2010-3863"></a>CVE-2010-3863</h2><h3 id="漏洞描述"><a href="#漏洞描述" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>1.1.0 之前的 Apache Shiro 和 JSecurity 0.9.x 在将它们与 shiro.ini 文件中的项进行对比之前不会规范化 URI 路径，这允许远程攻击者通过精心设计的请求绕过预期的访问限制，如：<code>/./account/index.jsp</code></p>
+<h3 id="适用范围"><a href="#适用范围" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.1.0</li>
+<li>JSecurity 0.9.X</li>
+</ul>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>远古版本了属于是，搭个环境给我整了半天。Shiro可以根据ini配置文件去读取用户名密码以及角色权限等信息用来做认证和授权；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[users]</span><br><span class="line">zhang=123,admin</span><br><span class="line">wang=123,admin,vip</span><br><span class="line"># 每一行定义一个用户, 格式是 username = password, role1, role2, ..., roleN</span><br><span class="line"></span><br><span class="line">[roles]</span><br><span class="line">admin=user:delete</span><br><span class="line"># 角色在这里定义, 格式是 roleName = perm1, perm2, ..., permN</span><br><span class="line"># 说明1: 权限名可以使用带有层次的命名方式, 使用冒号来分割层次关系, 比如 user:create 或 user:poweruser:update 权限.</span><br><span class="line"># 说明2: user:* 这样的权限, 代表具有 user:create 和 user:poweruser:update 权限.</span><br><span class="line"></span><br><span class="line">[urls]</span><br><span class="line">/static/**=anon</span><br><span class="line">/login=anon</span><br><span class="line">/authc/admin/user/delete=perms[&quot;user:delete&quot;]</span><br><span class="line">/authc/admin/user/create=perms[&quot;user:create&quot;]</span><br><span class="line">/authc/admin/**=roles[admin]</span><br><span class="line">/authc/home=roles[admin,vip]</span><br><span class="line">/authc/**=authc</span><br></pre></td></tr></table></figure>
+
+<p>在request请求到达web容器后，会调用PathMatchingFilterChainResolver的getChain方法获取FilterChain</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303262133146.png" alt="image-20230326213317404"></p>
+<p>这个pathMatches方法，其实就是比对你的ini文件中的urls标签下的每一项跟请求的uri是否相等，如果相等，则使用Shiro代理的FilterChain，即ProxiedFilterChain</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303262136188.png" alt="image-20230326213630096"></p>
+<p>当执行完Shiro的ProxiedFilterChain后，就执行原来的FilterChain</p>
+<p>导致该漏洞的原因就在于，PathMatchingFilterChainResolver的getChain方法中，在获取请求uri时未标准化路径</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303262141373.png" alt="image-20230326214154304"></p>
+<p>它使用getPathWithinApplication获取请求URI，在getPathWithinApplication方法中继续调用getPathWithinApplication</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303262143815.png" alt="image-20230326214336787"></p>
+<p>然后在WebUtils的getPathWithinApplication中，调用getRequestUri方法</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303262143220.png" alt="image-20230326214359185"></p>
+<p>先从<code>javax.servlet.include.request_uri</code>取，取不到在调用getRequestURI获取请求uri，然后调用decodeAndCleanUriString</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303262144123.png" alt="image-20230326214445084"></p>
+<p>在decodeAndCleanUriString中，59为分号，分割分号前的一部分并返回，这是因为一些中间件会在 url 处添加 <code>;jsessionid</code>，所以这里对 <code>;</code> 进行了截取。</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303262146263.png" alt="image-20230326214602417"></p>
+<p>全流程看下来，他并没有对路径进行标准化处理，啥是标准化处理，就是去除路径中的<code>/./</code>、<code>\\</code>以及其他一些特殊符号。</p>
+<p>这就可以绕过权限认证了，当我配置了&#x2F;index需要认证才能访问，此时我就可以用&#x2F;.&#x2F;index绕过认证直接访问。</p>
+<h3 id="修复"><a href="#修复" class="headerlink" title="修复"></a>修复</h3><p>在后续版本增加了标准化处理，在WebUtils的getPathWithinApplication方法中，调用了normalize进行标准化处理</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303262151400.png" alt="image-20230326215121350"></p>
+<p>对路径中使用<code>\</code>的替换为<code>/</code>，如果路径为<code>/.</code>返回<code>/</code>，如果路径不以<code>/</code>开头，就给他加个<code>/</code>，然后当路径中有<code>//</code>，去除一个<code>/</code>，当路径中有<code>/./</code>，去掉<code>/.</code>，当路径中有<code>/../</code>，将直接移除<code>/..</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303262152085.png" alt="image-20230326215153552"></p>
+<h2 id="CVE-2014-0074-x2F-Shiro-460"><a href="#CVE-2014-0074-x2F-Shiro-460" class="headerlink" title="CVE-2014-0074&#x2F;Shiro-460"></a>CVE-2014-0074&#x2F;Shiro-460</h2><h3 id="漏洞描述-1"><a href="#漏洞描述-1" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>1.2.3 之前的 Apache Shiro，当使用的 LDAP 服务器启用了无需身份验证即可绑定的功能时，允许远程攻击者通过空用户名或空密码绕过身份验证。</p>
+<h3 id="适用范围-1"><a href="#适用范围-1" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.2.3</li>
+</ul>
+<h3 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h3><p>在skis提出的<a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/SHIRO-460?jql=project%20=%20SHIRO">issue</a>中，当在shiro.ini文件中指定了以下几项：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">ldapContextFactory</span> = org.apache.shiro.realm.ldap.JndiLdapContextFactory</span><br><span class="line"><span class="attr">ldapContextFactory.url</span> = ldap://abc.internal:<span class="number">389</span>/</span><br><span class="line"></span><br><span class="line"><span class="attr">adRealm</span> = org.apache.shiro.realm.activedirectory.ActiveDirectoryRealm</span><br><span class="line"><span class="attr">adRealm.ldapContextFactory</span> = <span class="variable">$ldapContextFactory</span></span><br><span class="line"><span class="attr">adRealm.searchBase</span> = <span class="string">&quot;CN=Configuration,DC=abc,DC=internal&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>指定从AD域中去获取用户的身份信息完成认证和授权</p>
+<p>这个配置文件指定了JndiLdapContextFactory类，这个类的getLdapContext方法是用来获取LDAP上下文的；</p>
+<p>getLdapContext方法的执行流程是，将验证信息封装到Hashtable中，然后使用该验证信息去连接LDAP服务器，获取LDAP上下文；</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303282247524.png" alt="image-20230328224736952"></p>
+<p>而关键就在于当LDAP服务器允许匿名访问（Anonymous）时，可以使用空用户和空密码登录，同时当LDAP开启任何人bind时，可以使用空用户和任意密码登录。这本质上来说是LDAP服务器的问题，但Shiro还是给了CVE且进行了修复</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303282259421.png" alt="image-20230328225927346"></p>
+<p>在新版本中新增了validateAuthenticationInfo方法，但是修了等于没修</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303282306964.png" alt="image-20230328230643923"></p>
+<p>他只是判断了用户名不为空且有密码就抛出异常，跟以上两种情景毫无关联，所以说修了等于没修</p>
+<h2 id="CVE-2016-4437-x2F-Shiro-550"><a href="#CVE-2016-4437-x2F-Shiro-550" class="headerlink" title="CVE-2016-4437&#x2F;Shiro-550"></a>CVE-2016-4437&#x2F;Shiro-550</h2><h3 id="漏洞描述-2"><a href="#漏洞描述-2" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>在Shiro 1.2.5之前，当没有为“remember me”功能配置密钥时，允许远程攻击者执行任意代码或通过请求参数绕过预期的访问限制。</p>
+<h3 id="适用范围-2"><a href="#适用范围-2" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.2.5</li>
+</ul>
+<h3 id="分析-2"><a href="#分析-2" class="headerlink" title="分析"></a>分析</h3><p>rememberMe功能由RememberMeManager提供，RememberMeManager是个接口，其实现类为</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291138541.png" alt="image-20230329113816489"></p>
+<p>在AbstractRememberMeManager中，他将密钥直接写在了代码中</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291138253.png" alt="image-20230329113857205"></p>
+<p>接下来跟一下调用流程</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291156225.png" alt="image-20230329115646150"></p>
+<p>在DefaultSecurityManager的createSubject方法中调用resolvePrincipals方法解析rememberMe参数，识别用户身份</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291159209.png" alt="image-20230329115937144"></p>
+<p>先从context中解析用户身份，解析不到再调用getRememberedIdentity方法中解析用户身份</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291202819.png" alt="image-20230329120200763"></p>
+<p>DefaultSecurityManager不具备解析rememberMe参数的能力，交由给RememberMeManager去解析，他会调用getRememberedPrincipals方法去解析rememberMe参数</p>
+<p><img src="C:\Users\lixuyong\AppData\Roaming\Typora\typora-user-images\image-20230329120340100.png" alt="image-20230329120340100"></p>
+<p>在AbstractRememberMeManager的getRememberedPrincipals方法中调用getRememberedSerializedIdentity获取用户标识</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291207140.png" alt="image-20230329120721039"></p>
+<p>getRememberedSerializedIdentity方法中将rememberMe参数的值进行base64解码，然后返回</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291211260.png" alt="image-20230329121120219"></p>
+<p>返回的字节再调用convertBytesToPrincipals进行转换</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291213210.png" alt="image-20230329121316174"></p>
+<p>先AES解密，然后再反序列化，下面就没必要看了，就是常规的获取反序列化器进行反序列化，这里就造成了反序列化漏洞，可以配合CC链以及其他链去执行任意代码</p>
+<p>整个流程梳理下来就是：</p>
+<ol>
+<li>若存在RememberMe属性，则获取他的值</li>
+<li>将值进行base64解码</li>
+<li>然后再进行AES解密</li>
+<li>然后进行反序列化</li>
+</ol>
+<p>所以只要我们控制了AES密钥，同时服务器存在利用链就可以进行反序列化攻击，执行任意代码</p>
+<h3 id="修复-1"><a href="#修复-1" class="headerlink" title="修复"></a>修复</h3><p>如一开始看到那样，在Shiro 1.2.5之前都是使用了默认密钥，而在1.2.5及后续的版本，都是随机产生的密钥</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291222687.png" alt="image-20230329122229642"></p>
+<h2 id="CVE-2016-6802"><a href="#CVE-2016-6802" class="headerlink" title="CVE-2016-6802"></a>CVE-2016-6802</h2><h3 id="漏洞描述-3"><a href="#漏洞描述-3" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>1.3.2 之前的 Apache Shiro 允许攻击者绕过预期的 servlet 过滤器并通过利用contextPath获得访问权限。</p>
+<h3 id="适用范围-3"><a href="#适用范围-3" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.3.2</li>
+</ul>
+<h3 id="分析-3"><a href="#分析-3" class="headerlink" title="分析"></a>分析</h3><p>跟CVE-2010-3863有点相似，在PathMatchingFilterChainResolver的getChain方法中，获取requestURI时调用getPathWithinApplication方法</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303262141373.png" alt="image-20230326214154304"></p>
+<p>而在getContextPath方法中未标准化路径</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291457132.png" alt="image-20230329145718059"></p>
+<p>进入getContextPath方法查看，他获取contextPath后，直接URL解码并返回，未作标准化路径的操作</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291458973.png" alt="image-20230329145811886"></p>
+<p>返回到getPathWithinApplication方法中，获取完contextPath之后直接截取</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291542742.png" alt="image-20230329154240696"></p>
+<p>若contextPath为<code>/shiro</code>，当传递的uri为<code>/aaa/../shiro/abc</code>，此时getContextPath获取的contextPath为<code>/aaa/../shiro</code>，getRequestUri获取的requestUri为<code>/shiro/abc</code>，因为<code>/shiro/abc</code>不以<code>/aaa/../shiro</code>开头，所以直接返回<code>/shiro/abc</code></p>
+<p>而为什么getContextPath返回的contextPath不是我们设置的<code>/shiro</code>呢？这是因为在Tomcat的Request的getContextPath方法对<code>/aaa/../shiro/abc</code>进行截取最后一个<code>/</code>之前的部分，得到得<code>/aaa/../shiro</code>，然后标准化后得到<code>/shiro</code>,比对我们设置的<code>/shiro</code>，若相等，就返回<code>/aaa/../shiro</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291623665.png" alt="image-20230329162342606"></p>
+<p>正常情况下，我们配置需要登录才能访问的路径都不会带上contextPath</p>
+<p>当设置需要登录才能访问的路径为<code>/abc</code>，而<code>/shiro/abc</code>成功的进行了绕过</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291618258.png" alt="image-20230329161809172"></p>
+<p>由于匹配不到在Shiro中设置的路径，从而绕过了Shiro过滤器，没有Shiro过滤器的把持下，就不需要进行认证和授权</p>
+<p>后续会继续分离<code>/shiro/abc</code>，进行<code>/abc</code>路由的访问</p>
+<h3 id="修复-2"><a href="#修复-2" class="headerlink" title="修复"></a>修复</h3><p>在1.3.2及之后的版本中，在WebUtils的getContextPath中，在返回前进行了标准化处理</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291647908.png" alt="image-20230329164744859"></p>
+<h2 id="CVE-2019-12422-x2F-Shiro-721"><a href="#CVE-2019-12422-x2F-Shiro-721" class="headerlink" title="CVE-2019-12422&#x2F;Shiro-721"></a>CVE-2019-12422&#x2F;Shiro-721</h2><h3 id="漏洞描述-4"><a href="#漏洞描述-4" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>在1.4.2之前的Apache Shiro，当使用默认的 “rememberMe “配置时，cookies可能容易受到填充攻击。</p>
+<h3 id="适用范围-4"><a href="#适用范围-4" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.4.2</li>
+</ul>
+<h3 id="分析-4"><a href="#分析-4" class="headerlink" title="分析"></a>分析</h3><p>跟Shiro无关，而是对Shiro采用的加密方式进行的攻击，所以略过，只要了解了Padding Oracle Attack 原理就能理解这个攻击的原理，这里推荐<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/833582b2f560">Padding Oracle Attack(填充提示攻击)详解及验证</a></p>
+<h2 id="CVE-2020-1957-x2F-Shiro-682"><a href="#CVE-2020-1957-x2F-Shiro-682" class="headerlink" title="CVE-2020-1957&#x2F;Shiro-682"></a>CVE-2020-1957&#x2F;Shiro-682</h2><h3 id="漏洞描述-5"><a href="#漏洞描述-5" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>1.5.2之前的Apache Shiro，当使用Apache Shiro与Spring动态控制器时，特制的请求可能导致认证绕过。</p>
+<h3 id="适用范围-5"><a href="#适用范围-5" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.5.2</li>
+</ul>
+<h3 id="分析-5"><a href="#分析-5" class="headerlink" title="分析"></a>分析</h3><p>根据提出的<a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/SHIRO-682?jql=project%20=%20SHIRO">issues</a>得知，当访问<code>/index</code>会被限制，而在后面加上<code>/</code>，则可以绕过访问限制。</p>
+<p>这是由于Spring-Web和Shiro的访问路径的不同处理造成的，在Spring-Web中，<code>/resource/menus</code>和<code>/resource/menus/</code>都可以访问资源，而在Shiro中，只有<code>/resource/menus</code>才会匹配上<code>pathPattern</code>从而进行身份验证和授权之类的操作。</p>
+<p>当访问<code>/index/</code>时，请求先进入Shiro的filter中，在PathMatchingFilterChainResolver进行路径匹配</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291842558.png" alt="image-20230329184245408"></p>
+<p>由于设置需要身份验证的路径为<code>/index</code>，这里匹配不到返回null，然后进入Spring-Web的DispatcherServlet中，在DispatcherServlet的doDispatch方法中获取Handler</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291846673.png" alt="image-20230329184606621"></p>
+<p>调用getHandler获取handler，后续在<code>PathPattern#match</code>方法中对<code>/admin/list/</code>和 <code>/admin/list</code>的匹配都会返回 true。</p>
+<p>除此之外，还通报了另一个绕过，利用的是Shiro和Spring-Web对url中的<code>;</code>处理的差别来绕过校验。</p>
+<p>Shiro配置中将<code>/abc/admin</code>设置成了需要认证才能访问</p>
+<p>POC：<code>/abc;bbb/admin</code></p>
+<p>在WebUtils的decodeAndCleanUriString方法中，他会截取分号之前的内容返回，即<code>/abc</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291905238.png" alt="image-20230329190507192"></p>
+<p>然后会因为匹配不到Shiro的pathMatches从而绕过Shiro的filter</p>
+<p>然后进入Spring-Web的处理</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291925275.png" alt="image-20230329192528228"></p>
+<p>最后返回的uri为&#x2F;abc&#x2F;admin，从而成功访问到加了限制的路由</p>
+<h3 id="修复-3"><a href="#修复-3" class="headerlink" title="修复"></a>修复</h3><p>在后续的版本中，在PathMatchingFilterChainResolver的getChain方法中，若路径最后一个符号为<code>/</code>号，则去掉</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291932106.png" alt="image-20230329193204032"></p>
+<p>同时为了统一，若在配置文件中指定需要认证的路径的最后一个字符<code>/</code>，也直接去掉</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291935025.png" alt="image-20230329193525962"></p>
+<p>而对于<code>;</code>的绕过，修复后直接使用contextPath、servletPath和pathInfo进行拼接得到，这些都是通过中间件的调用得到的</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303292300126.png" alt="image-20230329230021036"></p>
+<p>直接获取中间件处理好的结果进行拼接，而不是自己去处理，但是有个坑点就是，他拼接完之后又会调用decodeAndCleanUriString方法去截取<code>;</code>之前的部分再标准化路径返回。</p>
+<p>但是对于这个POC<code>/abc;bbb/admin</code>来说，再用decodeAndCleanUriString方法之前他已经拼接好了路径为<code>/abc/admin</code>，就不用去截取了，但是若从中间件获取到的路径带有分号的话还会去截取分号之前的部分，造成跟Spring-Web处理不相同而导致的漏洞</p>
+<h2 id="CVE-2020-11989-x2F-Shiro-782"><a href="#CVE-2020-11989-x2F-Shiro-782" class="headerlink" title="CVE-2020-11989&#x2F;Shiro-782"></a>CVE-2020-11989&#x2F;Shiro-782</h2><h3 id="漏洞描述-6"><a href="#漏洞描述-6" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>1.5.3之前的Apache Shiro，当使用Apache Shiro与Spring动态控制器时，一个特制的请求可能会导致认证绕过。</p>
+<h3 id="适用范围-6"><a href="#适用范围-6" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.5.3</li>
+</ul>
+<h3 id="分析-6"><a href="#分析-6" class="headerlink" title="分析"></a>分析</h3><h4 id="第一个绕过"><a href="#第一个绕过" class="headerlink" title="第一个绕过"></a>第一个绕过</h4><p>当Shiro使用Ant风格的路径表达式配置路径时，就有可能导致权限绕过</p>
+<table>
+<thead>
+<tr>
+<th align="center">通配符</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">?</td>
+<td align="center">匹配任何单字符</td>
+</tr>
+<tr>
+<td align="center">*</td>
+<td align="center">匹配0或者任意数量的字符</td>
+</tr>
+<tr>
+<td align="center">**</td>
+<td align="center">匹配0或者更多的目录</td>
+</tr>
+</tbody></table>
+<p>例如：<code>/admin/*</code>可以匹配<code>/admin/xxx</code>，但是不能跨目录，而<code>/admin/**</code>可以匹配<code>/admin/xxx</code>也可以匹配<code>/admin/xxx/xxx</code>，可以跨目录</p>
+<p>当配置<code>/admin/*</code>需要认证才能访问，而访问的uri为<code>/admin/aa/bb</code>能进行绕过，因为<code>/admin/*</code>无法跨目录</p>
+<p>此次漏洞的原因在于getPathInfo获取路径时会进行解码</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303292300126.png" alt="image-20230329230021036"></p>
+<p>解码完再调用decodeAndCleanUriString又会进行一次解码</p>
+<p>而进入Spring-Web的处理时，只会将uri解码一次，这就造成了此次漏洞</p>
+<p>将斜杆两次编码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/ -&gt; %2f -&gt;%25%32%66</span><br></pre></td></tr></table></figure>
+
+<p>此时配置<code>/admin/*</code>需要认证才能访问，我们访问<code>/admin/a%25%32%66b</code>会被Shiro解码成<code>/admin/a/b</code>，此时就绕过了匹配，当进入Spring容器时，Spring容器只会进行一次解码，将<code>/admin/a%25%32%66b</code>解码成<code>/admin/a%2fb</code>，这时候就成功的进行了访问</p>
+<p>但是正常人谁会把访问的路由写成<code>/a%2fb</code>，结果还真有这种情景，就是当把路径作为参数时，</p>
+<p>也就是如下情况</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(value=&quot;/admin/&#123;name&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">list</span><span class="params">(<span class="meta">@PathVariable</span> String name)</span>&#123;</span><br><span class="line">    xxx</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>动态接收name的值作为请求参数进行处理</p>
+<h4 id="第二个绕过"><a href="#第二个绕过" class="headerlink" title="第二个绕过"></a>第二个绕过</h4><p>还有一个坑点，是利用<code>;</code>进行的绕过，也就是1957未修复的坑点</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303292335722.png" alt="image-20230329233532664"></p>
+<p>也就是在获取contextPath时，会有带有分号的情况，然后调用decodeAndCleanUriString会截取分号之前的部分，举个例子：</p>
+<p>我们配置<code>/xx</code>需要认证才能访问，我们访问的uri为<code>/;/admin/xx</code>，则通过request的getContextPath方法获取到的contextPath为<code>/;/admin</code>，经过decodeAndCleanUriString方法的洗礼，他会截取<code>;</code>之前的部分，即<code>/</code>，然后使用<code>/</code>去匹配需要认证的路由，未匹配上，成功的进行了绕过；而后续在Spring-Web的处理中，他会处理成<code>/admin/xx</code>，这时候就成功访问到了<code>/admin/xx</code>的controller且无需认证</p>
+<p>原理是在调用Tomcat的Request的getContextPath方法获取contextPath时</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303300008924.png" alt="image-20230330000851864"></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303300012565.png" alt="image-20230330001242503"></p>
+<h3 id="修复-4"><a href="#修复-4" class="headerlink" title="修复"></a>修复</h3><p>在后续的版本中，去除getRequestUri的调用，那么就同时修复了两个绕过</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303300024232.png" alt="img"></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303300015468.png" alt="image-20230330001546418"></p>
+<h2 id="CVE-2020-13933"><a href="#CVE-2020-13933" class="headerlink" title="CVE-2020-13933"></a>CVE-2020-13933</h2><h3 id="漏洞描述-7"><a href="#漏洞描述-7" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>1.6.0之前的Apache Shiro，当使用Apache Shiro时，特制的HTTP请求可能导致认证绕过。</p>
+<h3 id="适用范围-7"><a href="#适用范围-7" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.6.0</li>
+</ul>
+<h3 id="分析-7"><a href="#分析-7" class="headerlink" title="分析"></a>分析</h3><p>还是利用SpringWeb和Shiro处理方式的差异进行绕过</p>
+<p>在Shiro中，先解码、后处理分号，然后再标准化路径</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301343994.png" alt="image-20230330134325921"></p>
+<p>在SpringWeb中，先处理分号，再解码，然后标准化路径</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291925275.png" alt="image-20230329192528228"></p>
+<p>主要是前面两个步骤的差距，可以导致绕过</p>
+<p>我们将<code>;</code>编码成%3b</p>
+<ol>
+<li>在Shiro中，他会先解码成分号然后截取分号前的内容</li>
+<li>在SpringWeb中，首先他找不到分号，因为分号已经被编码成%3b，相当于他不会处理分号，然后他才将分号解码</li>
+</ol>
+<p>所以我们可以使用<code>;</code>去绕过一些需要认证的路径，只要他截取的分号前的内容设置了不需要验证即可</p>
+<p><code>/admin/*</code>需要认证才能访问，而我们通过加个%3b，即<code>/admin/%3bxx</code>，在Shiro中，他会解码成分号，然后截取分号前的内容，即<code>/admin/</code>，这里就绕过了Shiro的过滤器，在后续Spring-Web处理中，该路径被处理成<code>/admin/;xx</code>就成功访问到了controller</p>
+<p>同样，也是如下场景</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(value=&quot;/admin/&#123;name&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">list</span><span class="params">(<span class="meta">@PathVariable</span> String name)</span>&#123;</span><br><span class="line">    xxx</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="修复-5"><a href="#修复-5" class="headerlink" title="修复"></a>修复</h3><p>Shiro新增了个全局过滤器，为InvalidRequestFilter</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301404673.png" alt="image-20230330140434584"></p>
+<p>这个类InvalidRequestFilter会检测uri是否存在分号、反斜杠以及非ASCII码字符，若检测到就会返回状态码400，消息为Invalid request</p>
+<h2 id="CVE-2020-17510"><a href="#CVE-2020-17510" class="headerlink" title="CVE-2020-17510"></a>CVE-2020-17510</h2><h3 id="漏洞描述-8"><a href="#漏洞描述-8" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>1.7.0之前的Apache Shiro，当与Spring一起使用Apache Shiro时，特制的HTTP请求可能导致认证绕过。</p>
+<h3 id="适用范围-8"><a href="#适用范围-8" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.7.0</li>
+</ul>
+<h3 id="分析-8"><a href="#分析-8" class="headerlink" title="分析"></a>分析</h3><p>同样还是SpringWeb和Shiro的处理差异造成的</p>
+<p>这次是因为<code>.</code>号造成的绕过，<code>.</code>号编码为<code>%2e</code></p>
+<p>那么对于Shiro和SpringWeb对待编码后的点号是怎么处理的呢？</p>
+<p>在Shiro中，它会先解码成<code>.</code>，不需要处理分号，然后标准化路径去掉<code>.</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301343994.png" alt="image-20230330134325921"></p>
+<p>而在Spring-Web中，首先无需处理分号，然后将<code>%2e</code>解码成<code>.</code>号，在getSanitizedPath也未处理<code>.</code>号</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303291925275.png" alt="image-20230329192528228"></p>
+<p>所以可以使用编码后的点号进行绕过，同样也是设置<code>/admin/*</code>需要认证才能访问，此时我们加上<code>%2e</code>，变成<code>/admin/%2e</code>；</p>
+<p>在Shiro中，处理成<code>/admin/</code>，无法匹配<code>/admin/*</code>而造成绕过</p>
+<p>在Spring中，处理成<code>/admin/.</code>，成功访问到了<code>/admin</code>下的路由</p>
+<p>同样也是以下场景会造成该漏洞</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(value=&quot;/admin/&#123;name&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBodypublic</span> </span><br><span class="line"><span class="keyword">void</span> <span class="title function_">list</span><span class="params">(<span class="meta">@PathVariable</span> String name)</span></span><br><span class="line">&#123;    </span><br><span class="line">    xxx</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="修复-6"><a href="#修复-6" class="headerlink" title="修复"></a>修复</h3><p>Shiro使用ShiroUrlPathHelper去继承了UrlPathHelper，然后将自己的ShiroUrlPathHelper注入到Spring中，替换掉默认处理的UrlPathHelper</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301521453.png" alt="image-20230330152131347"></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301522374.png" alt="image-20230330152202324"></p>
+<p>这样使得Spring使用了Shiro的方式去处理路径，统一了处理方式</p>
+<h2 id="CVE-2020-17523"><a href="#CVE-2020-17523" class="headerlink" title="CVE-2020-17523"></a>CVE-2020-17523</h2><h3 id="漏洞描述-9"><a href="#漏洞描述-9" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>1.7.1之前的Apache Shiro，当将Apache Shiro与Spring一起使用时，特制的HTTP请求可能导致认证绕过。</p>
+<h3 id="适用范围-9"><a href="#适用范围-9" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.7.1</li>
+</ul>
+<h3 id="分析-9"><a href="#分析-9" class="headerlink" title="分析"></a>分析</h3><p>再次绕过，这次是通过空格编码进行的绕过，空格编码为<code>%20</code></p>
+<p>获取请求uri</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301542357.png" alt="image-20230330154221277"></p>
+<p>这里只会解码<code>%20</code>，变成空格</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301343994.png" alt="image-20230330134325921"></p>
+<p>然后处理完，进行路径的匹配，进入pathMatches查看</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301544051.png" alt="image-20230330154424953"></p>
+<p>进入</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301546172.png" alt="image-20230330154656110"></p>
+<p>后面会来到AntPathMatcher#doMatch进行匹配</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301547509.png" alt="image-20230330154734447"></p>
+<p>进入tokenizeToStringArray</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301558125.png" alt="image-20230330155809063"></p>
+<p>进入tokenizeToStringArray</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301600226.png" alt="image-20230330160008110"></p>
+<p>其实就是使用<code>/</code>分割字符串然后去除空格的这么一个操作，其实总的来说就是去掉空格</p>
+<p>而SpringWeb跟Shiro也是一样的处理</p>
+<p>设置<code>/admin/*</code>需要认证才能访问，我们使用<code>/admin/%20</code>，经过Shiro他会处理成<code>/admin/</code>，匹配不上<code>/admin/*</code>从而导致绕过，同样也是以下场景会导致该漏洞</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(value=&quot;/admin/&#123;name&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBodypublic</span> </span><br><span class="line"><span class="keyword">void</span> <span class="title function_">list</span><span class="params">(<span class="meta">@PathVariable</span> String name)</span></span><br><span class="line">&#123;    </span><br><span class="line">    xxx</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="修复-7"><a href="#修复-7" class="headerlink" title="修复"></a>修复</h3><p>在<code>StringUtils#tokenizeToStringArray</code> 方法的第三个参数 trimTokens 为 false，也就是不去除空格</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301603321.png" alt="image-20230330160347211"></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301603349.png" alt="image-20230330160304239"></p>
+<h2 id="CVE-2021-41303-x2F-Shiro-825"><a href="#CVE-2021-41303-x2F-Shiro-825" class="headerlink" title="CVE-2021-41303&#x2F;Shiro-825"></a>CVE-2021-41303&#x2F;Shiro-825</h2><h3 id="漏洞描述-10"><a href="#漏洞描述-10" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>1.8.0之前的Apache Shiro，当与Spring Boot一起使用Apache Shiro时，特制的HTTP请求可能会导致认证绕过。</p>
+<h3 id="适用范围-10"><a href="#适用范围-10" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.8.0</li>
+</ul>
+<h3 id="分析-10"><a href="#分析-10" class="headerlink" title="分析"></a>分析</h3><p>在上面那个CVE-2020-17523中，后续的1.7.1版本又增加了新的逻辑</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301751860.png" alt="image-20230330175140741"></p>
+<p>如图，它首先会比对原始uri，没比对到再去掉末尾斜杆再进行比对，比对到了就将去掉末尾斜杆uri进行传入</p>
+<p>当设置如下配置时，就会产生漏洞</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/admin/* authc</span><br><span class="line">/admin/list anon</span><br></pre></td></tr></table></figure>
+
+<p>按理来说，当我们访问<code>/admin</code>目录下的任何路由(不跨目录)都需要鉴权，所以一般来说没有认证都是访问不了这个<code>/admin/list</code>的</p>
+<p>但是这个漏洞就是可以绕过第一个配置，去访问第二个路由</p>
+<p>首先我们传入的poc为<code>/admin/list/</code>，依据顺序，他首先会匹配第一个，因为原始的uri：<code>/admin/list/</code>匹配不到<code>/admin/*</code>，此时会去掉uri的最后一个斜杆进行匹配，即<code>/admin/list</code>，此时就匹配到了<code>/admin/*</code>，然后进入filterChainManager.proxy，并将去掉斜杆的uri传入，即<code>/admin/list</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301745497.png" alt="image-20230330174518387"></p>
+<p>进入filterChainManager.proxy进行查看</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301755475.png" alt="image-20230330175530419"></p>
+<p>再进入getChain查看</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301756780.png" alt="image-20230330175601713"></p>
+<p>从map中取，发现刚好有，而对于没有配置的，例如访问<code>/admin/li/</code>，他取不到，就会抛出异常</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301758763.png" alt="image-20230330175821706"></p>
+<p>回到对<code>/admin/list/</code>的访问中，在后续他会将代理filterChain返回</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301803727.png" alt="image-20230330180308668"></p>
+<p>代理filterChain有两个filter，第一个为登录过滤器，第二为匿名过滤器</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301805117.png" alt="image-20230330180507064"></p>
+<p>匿名过滤器直接放行，此时就会去访问<code>/admin/list</code>的controller了，此时就成功的进行了绕过</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301806579.png" alt="image-20230330180636506"></p>
+<p>这个利用条件特别极端，正常人不会这样写配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/admin/* authc</span><br><span class="line">/admin/list anon</span><br></pre></td></tr></table></figure>
+
+<h3 id="修复-8"><a href="#修复-8" class="headerlink" title="修复"></a>修复</h3><p>在1.8.0中，传入的参数由requestURINoTrailingSlash变成pathPattern，即<code>/admin/*</code>而不是<code>/admin/list</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301813452.png" alt="image-20230330181312333"></p>
+<p>而在map中取到的就是需要认证的<code>/admin/*</code>了</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301814806.png" alt="image-20230330181449743"></p>
+<p>这时就无法绕过第一个配置项去访问第二个配置项了</p>
+<h2 id="CVE-2022-32532"><a href="#CVE-2022-32532" class="headerlink" title="CVE-2022-32532"></a>CVE-2022-32532</h2><h3 id="漏洞描述-11"><a href="#漏洞描述-11" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>Apache Shiro在1.9.1之前，RegexRequestMatcher可能被错误配置，导致在一些servlet容器上被绕过。使用RegExPatternMatcher的正则表达式中含有<code>.</code>的应用程序可能会受到权限绕过的影响。</p>
+<h3 id="适用范围-11"><a href="#适用范围-11" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.9.1</li>
+</ul>
+<h3 id="分析-11"><a href="#分析-11" class="headerlink" title="分析"></a>分析</h3><p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303302116311.png" alt="image-20230330211643248"></p>
+<p>Shiro有两种表达式可以匹配路径，一种是AntPathMatcher，另一种是RegExPatternMatcher，前面一直都是使用Ant风格，也就是第一种</p>
+<table>
+<thead>
+<tr>
+<th align="center">通配符</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">?</td>
+<td align="center">匹配任何单字符</td>
+</tr>
+<tr>
+<td align="center">*</td>
+<td align="center">匹配0或者任意数量的字符</td>
+</tr>
+<tr>
+<td align="center">**</td>
+<td align="center">匹配0或者更多的目录</td>
+</tr>
+</tbody></table>
+<p>第二种其实就是正则表达式</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303302117570.png" alt="image-20230330211727509"></p>
+<p>这个漏洞很好理解，当配置了需要认证的路径为<code>/admin/.*</code>，而在正则表达式中元字符<code>.</code>是匹配除换行符（<code>\n</code>、<code>\r</code>）之外的任何单个字符，<code>\r</code>的URL编码为<code>%0d</code>，<code>\n</code>的URL编码为<code>%0a</code>，所以可以使用<code>/admin/%0d</code>或者<code>/admin/%0a</code>，这样就无法匹配<code>/admin/.*</code>从而绕过认证</p>
+<h3 id="修复-9"><a href="#修复-9" class="headerlink" title="修复"></a>修复</h3><p>新增caseInsensitive，并且默认为false</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303302256855.png" alt="image-20230330225625787"></p>
+<p>Pattern.compile第二个参数为32，表示启用DOTALL模式，此时元字符<code>.</code>会匹配换行符（<code>\n</code>、<code>\r</code>）在内的任何单个字符</p>
+<h2 id="CVE-2022-40664"><a href="#CVE-2022-40664" class="headerlink" title="CVE-2022-40664"></a>CVE-2022-40664</h2><h3 id="漏洞描述-12"><a href="#漏洞描述-12" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>1.10.0之前的Apache Shiro，Shiro在通过RequestDispatcher进行请求转发(forward)或请求包括(include)时存在认证绕过漏洞。</p>
+<h3 id="适用范围-12"><a href="#适用范围-12" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>Shiro &lt; 1.10.0</li>
+</ul>
+<h3 id="分析-12"><a href="#分析-12" class="headerlink" title="分析"></a>分析</h3><p>在进行请求转发或包含时不会进行鉴权，导致绕过</p>
+<p>首先添加如下配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">map.put(&quot;/forward&quot;,&quot;anon&quot;);</span><br><span class="line">map.put(&quot;/admin/list&quot;,&quot;authc&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>设置<code>/admin/list</code>需要认证，<code>/forward</code>不需要认证</p>
+<p>如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;/admin/list&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">list</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;访问成功！&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@GetMapping(&quot;/forward&quot;)</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">forward</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">&quot;forward:/admin/list&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>直接访问<code>/admin/list</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303302324817.png" alt="image-20230330232433772"></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303302324740.png" alt="image-20230330232422682"></p>
+<p>会跳转到登录页面</p>
+<p>而访问<code>/forward</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303302326442.png" alt="image-20230330232616272"></p>
+<p>访问成功，绕过<code>/admin/list</code>的鉴权</p>
+<p>在Tomcat应用的整个过滤链中，他会调用doFilter去依次执行过滤链中的每个过滤器</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311239017.png" alt="image-20230331123920877"></p>
+<p>而doFilter又会调用internalDoFilter方法</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311241011.png" alt="image-20230331124156900"></p>
+<p>在internalDoFilter中会去调用各个filter的doFilter方法</p>
+<p>而在Shiro的doFilter方法中，若在一次请求中已经被Shiro的过滤器过滤过了的话，则不会再调用Shiro的filter再过滤一遍，然后将请求传给其他过滤链中的过滤器</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311243643.png" alt="image-20230331124344561"></p>
+<p>因为请求<code>/forward</code>的时候，他会走一遍Shiro的过滤器，然后将alreadyFilteredAttributeName设置为shiroFilter.FILTERED，代表已经过滤过</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311249978.png" alt="image-20230331124915855"></p>
+<p>然后在<code>/forward</code>的controller中，将请求进行转发</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311250749.png" alt="image-20230331125046681"></p>
+<p>而访问<code>/admin/list</code>时，这两次的路由访问相当于一次请求，因为前面访问<code>/forward</code>路由时已经经过Shiro的过滤器过滤了一遍，所以此时访问<code>/admin/list</code>路由，则不会走Shiro的过滤器，从而绕过认证</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311252010.png" alt="image-20230331125245922"></p>
+<h3 id="修复-10"><a href="#修复-10" class="headerlink" title="修复"></a>修复</h3><p>而在Shiro的1.10.0及以后，出现了个ShiroFilterConfiguration类</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311257888.png" alt="image-20230331125705830"></p>
+<p>这个属性filterOncePerRequest若为false，则代表每次调用都会执行过滤器，这个属性若为true，则代表每次请求都会执行过滤器</p>
+<p>而在OncePerRequestFilter的doFilter方法中，新增了个判断</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311258915.png" alt="image-20230331125843839"></p>
+<h2 id="CVE-2023-22602"><a href="#CVE-2023-22602" class="headerlink" title="CVE-2023-22602"></a>CVE-2023-22602</h2><h3 id="漏洞描述-13"><a href="#漏洞描述-13" class="headerlink" title="漏洞描述"></a>漏洞描述</h3><p>当把1.11.0之前的Apache Shiro与Spring Boot 2.6+ 一起使用时，特制的HTTP请求可能导致认证绕过。当Shiro和Spring Boot使用不同的模式匹配技术时，认证绕过就会发生。Shiro和Spring Boot &lt; 2.6时都默认为Ant风格的模式匹配。</p>
+<h3 id="适用范围-13"><a href="#适用范围-13" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>SpringBoot &gt; 2.6 且 Shiro &lt; 1.11.0</li>
+</ul>
+<h3 id="分析-13"><a href="#分析-13" class="headerlink" title="分析"></a>分析</h3><p>SpringBoot 2.6+后，Controller的路径匹配默认使用<code>path_pattern_parser</code></p>
+<p>2.6以前在配置文件中可以这样配置以使用<code>path_pattern_parser</code></p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">mvc:</span></span><br><span class="line">    <span class="attr">pathmatch:</span></span><br><span class="line">      <span class="attr">matching-strategy:</span> <span class="string">path_pattern_parser</span></span><br></pre></td></tr></table></figure>
+
+<p>2.6之前使用<code>ant_path_matcher</code>解析Controller的路径，Ant风格估计都很熟，前面说过好几次了，就当作复习一下</p>
+<table>
+<thead>
+<tr>
+<th align="center">通配符</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">?</td>
+<td align="center">匹配任何单字符</td>
+</tr>
+<tr>
+<td align="center">*</td>
+<td align="center">匹配0或者任意数量的字符</td>
+</tr>
+<tr>
+<td align="center">**</td>
+<td align="center">匹配0或者更多的目录</td>
+</tr>
+</tbody></table>
+<p>他们之间的差别在于：</p>
+<p>ant_path_matcher的通配符可以在中间，如：<code>abc/**/xyz</code>。</p>
+<p>path_pattern_parser的通配符只能定义在尾部，如：<code>abc/xyz/**</code>，且可以使用<code>&#123;*path&#125;</code>接收多级路由。<code>path</code>可以随意取名，与<code>@PathVariable</code>名称对应即可。</p>
+<p>首先把环境搭一下</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311927715.png" alt="image-20230331192759638"></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311928179.png" alt="image-20230331192810125"></p>
+<p>设置<code>/login</code>和<code>/**</code>无需认证，<code>/admin/**</code>需要认证</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311928125.png" alt="image-20230331192834071"></p>
+<p>再添加三个路由</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311929959.png" alt="image-20230331192943902"></p>
+<p>先正常访问<code>/admin/ak</code>，由于需要认证会跳到登录页面</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311931645.png" alt="image-20230331193127587"></p>
+<p>这时访问<code>/admin/..</code>，**注意！！！！不能直接在浏览器地址栏这样输入然后回车，这里有个坑点，浏览器看到uri有<code>..</code>会自动将uri变成<code>/</code>**，这个坑点导致我复现半天</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311934436.png" alt="image-20230331193449312"></p>
+<p>抓包，却变成了<code>/</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311935904.png" alt="image-20230331193512839"></p>
+<p>这时候改成<code>/admin/..</code>就行了</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311935061.png" alt="image-20230331193553003"></p>
+<p>这时候就访问成功了</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311936364.png" alt="image-20230331193625301"></p>
+<p>在PathMatchingFilterChainResolver的getChain方法下个断点</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311938154.png" alt="image-20230331193822080"></p>
+<p>之前说过，调用getPathWithinApplication方法后续会将路径标准化，经过normalize的处理，会将<code>/admin/..</code>变成<code>/</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303301343994.png" alt="image-20230330134325921"></p>
+<p>这时候由于pathMatches无法匹配，而返回null（暂且这么理解），绕过了Shiro的认证</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311941822.png" alt="image-20230331194100731"></p>
+<p>后续进入Spring的处理中，在ServletRequestPathUtils的parseAndCache方法中会获取请求uri，并设置<code>PATH_ATTRIBUTE</code>属性，进入ServletRequestPath的parse方法查看</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311944915.png" alt="image-20230331194404835"></p>
+<p>获取请求uri</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311944469.png" alt="image-20230331194434370"></p>
+<p>获取到的为<code>/admin/..</code>，这里其实就是调用中间件的getRequestURI，后面那个if不重要，滤过，RequestPath.parse其实就是将uri包装了一下，包装成DefaultRequestPath类</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311946235.png" alt="image-20230331194635173"></p>
+<p>然后设置属性PATH_ATTRIBUTE，并返回</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311950277.png" alt="image-20230331195002190"></p>
+<p>这个属性很重要，然后就是Spring根据路径去匹配controller了</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311950789.png" alt="image-20230331195051727"></p>
+<p>这里的usesPathPatterns方法就是判断是否用了<code>path_pattern_parser</code>模式，为true，然后removeAttribute方法移除UrlPathHelper.PATH_ATTRIBUTE属性（这跟刚刚设置的PATH_ATTRIBUTE属性不同），然后进入ServletRequestPathUtils.getParsedRequestPath(request);</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311954445.png" alt="image-20230331195459378"></p>
+<p>在getParsedRequestPath方法里，其实就是获取之前设置的PATH_ATTRIBUTE属性的值，也就是那个包装了uri：<code>/admin/..</code>的类</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311956863.png" alt="image-20230331195636778"></p>
+<p>回到initLookupPath方法，requestPath.pathWithinApplication().value()这一连串操作其实就是获取uri，这个removeSemicolonContent就是为了移除分号</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303311958648.png" alt="image-20230331195817556"></p>
+<p>后续在AbstractHandlerMethodMapping的addMatchingMappings方法中寻找<code>/admin/..</code>匹配的controller，<code>/admin/**</code>匹配到了，放入List集合matches中</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303312002447.png" alt="image-20230331200209338"></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303312003619.png" alt="image-20230331200341535"></p>
+<p>然后根据<code>/admin/**</code>路径去寻找Bean</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303312005380.png" alt="image-20230331200550285"></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303312005527.png" alt="image-20230331200559441"></p>
+<p>然后就是执行这个Bean</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303312007293.png" alt="image-20230331200753182"></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303312008388.png" alt="image-20230331200815328"></p>
+<p>其实就是利用<code>/admin/..</code>会被Shiro标准化为<code>/</code>的特性，绕过Shiro的路径匹配，然后由于controller设置了<code>/admin/**</code>从而匹配到了该路径并执行</p>
+<h3 id="修复-11"><a href="#修复-11" class="headerlink" title="修复"></a>修复</h3><h4 id="设置ant匹配路径"><a href="#设置ant匹配路径" class="headerlink" title="设置ant匹配路径"></a>设置ant匹配路径</h4><p>在application.yml设置使用ant匹配路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  mvc:</span><br><span class="line">    pathmatch:</span><br><span class="line">      matching-strategy: ant_path_matcher</span><br></pre></td></tr></table></figure>
+
+<p>在AbstractHandlerMapping的initLookupPath方法中就会走else</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303312020501.png" alt="image-20230331202017421"></p>
+<p>后续就会走到Shiro的获取uri的getPathWithinApplication方法，获取到的uri为<code>/</code></p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303312021868.png" alt="image-20230331202104783"></p>
+<h4 id="升级版本"><a href="#升级版本" class="headerlink" title="升级版本"></a>升级版本</h4><p>将Shiro升级到1.11.0以上</p>
+<p><img src="https://raw.githubusercontent.com/CyberIKUN/picture/main/img/202303312038211.png" alt="image-20230331203855112"></p>
+<p>继承了EnvironmentPostProcessor</p>
+<p>该类的作用是在SpringBoot项目启动之前自定义环境变量，可以在项目启动之前从非标准springboot配置文件中读取相关的配置并填充到springboot上下文中。中间有些跳步骤，建议还是自己多手调一下。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>CVE-2010-3863因为getRequestUri未标准化路径，可以使用<code>/./</code>进行绕过</li>
+<li>CVE-2014-0074&#x2F;Shiro-460由于LDAP服务器开启匿名登录或未授权登录，导致可以使用空用户名搭配空密码或空用户名搭配任意密码</li>
+<li>CVE-2016-4437&#x2F;Shiro-550就是著名的反序列化漏洞了</li>
+<li>CVE-2016-6802因为getContextPath未标准化路径，可以使用<code>/../</code>进行绕过</li>
+<li>CVE-2019-12422&#x2F;Shiro-721是对rememberMe功能加密方式的攻击</li>
+<li>CVE-2020-1957&#x2F;Shiro-682是由于SpringWeb和Shiro处理方式不同，导致可以使用加路径末尾加斜杆或路径中加分号进行绕过</li>
+<li>CVE-2020-11989&#x2F;Shiro-782是由于SpringWeb和Shiro处理方式不同，导致可以使用斜杆双编码或加分号进行绕过</li>
+<li>CVE-2020-13933是由于SpringWeb和Shiro处理方式不同，导致可以使用分号编码进行绕过</li>
+<li>CVE-2020-17510是由于SpringWeb和Shiro处理方式不同，导致可以使用点号编码进行绕过</li>
+<li>CVE-2020-17523是由于SpringWeb和Shiro处理方式不同，导致可以使用空格编码进行绕过</li>
+<li>CVE-2021-41303&#x2F;Shiro-825是由于新增逻辑的错误，导致可以绕过第一个需要认证的路径而访问第二个匿名路径</li>
+<li>CVE-2022-32532是由于Shiro正则代表路径，且路径中含有<code>.</code>号，导致可以使用<code>%0d</code>或<code>%0a</code>进行绕过</li>
+<li>CVE-2022-40664是由于Shiro在进行请求转发或包含时未进行鉴权导致绕过</li>
+<li>CVE-2023-22602是由于SpringWeb和Shiro使用的路径处理模式不同，导致可以使用<code>/..</code>进行绕过</li>
+</ul>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><p><a target="_blank" rel="noopener" href="https://javasec.org/java-vuls/shiro/Shiro-5.html">Shiro漏洞</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/11633#toc-50">Shiro 历史漏洞分析</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7154702383720136718">Shiro身份验证绕过——CVE-2022-40664</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.zhangbj.com/p/1261.html">Spring Boot Controller 路径匹配规则</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://forum.ezreal.cool/thread-111-1-1.html">CVE-2023-22602 漏洞分析</a></p>
+</li>
+<li><p>Shiro 组件的检测：检测站点是否包含 shiro 组件，cookie 关键字不是 rememberMe 等情况；</p>
+</li>
+<li><p>Shiro AES 弱密钥的检测：检测 Shiro 是否内置或配置了常见的弱密钥；</p>
+</li>
+<li><p>Shiro 内置链的利用：无 CC 依赖的 CB 链反序列化利用；</p>
+</li>
+<li><p>配合 RMI 利用：处理由于插入反序列化链导致的 Header 长度的问题，以及 Transformer 数组加载不到报错问题；</p>
+</li>
+<li><p>其他绕过 Tomcat Header 长度的姿势：反射修改 AbstractHttp11Protocol 的 maxHeaderSize、gzip + base64压缩编码、从外部或从 HTTP 请求 body 中加载类字节码；</p>
+</li>
+<li><p>Ysoserial 改造：由于 shiro RememberMe 反序列化流程中加载类方式不同导致需要对 ysoserial 中 CC 等链的改造；</p>
+</li>
+<li><p>组合攻击：在 weblogic&#x2F;Tomcat 等中间件上完成 shiro 的攻击、gadget 的利用、内存马的写入等组合操作；</p>
+</li>
+<li><p>改 Key：对于弱加密密钥，在攻击后将其修改，让目标仅为自己所用。</p>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://cyberikun.github.io/carpet">ZeanHike</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://cyberikun.github.io/carpet/2023/03/31/Shiro/">https://cyberikun.github.io/carpet/2023/03/31/Shiro/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://cyberikun.github.io/carpet" target="_blank">ZeanHike</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/carpet/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">漏洞分析</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101021498.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/carpet/2023/04/15/XStream/" title="XStream漏洞全系分析(截至2023/4/15)"><img class="cover" src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101608758.jpg" onerror="onerror=null;src='/carpet/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">XStream漏洞全系分析(截至2023/4/15)</div></div></a></div><div class="next-post pull-right"><a href="/carpet/2023/03/25/FastJSON/" title="FastJSON(全系漏洞分析-截至2023/03/25)"><img class="cover" src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101036966.png" onerror="onerror=null;src='/carpet/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">FastJSON(全系漏洞分析-截至2023/03/25)</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/carpet/2023/03/25/FastJSON/" title="FastJSON(全系漏洞分析-截至2023&#x2F;03&#x2F;25)"><img class="cover" src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101036966.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-25</div><div class="title">FastJSON(全系漏洞分析-截至2023&#x2F;03&#x2F;25)</div></div></a></div><div><a href="/carpet/2023/06/09/WebLogic/" title="WebLogic全系漏洞分析截至20230609"><img class="cover" src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306091851837.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-06-09</div><div class="title">WebLogic全系漏洞分析截至20230609</div></div></a></div><div><a href="/carpet/2023/04/15/XStream/" title="XStream漏洞全系分析(截至2023&#x2F;4&#x2F;15)"><img class="cover" src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101608758.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-15</div><div class="title">XStream漏洞全系分析(截至2023&#x2F;4&#x2F;15)</div></div></a></div></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="gitalk-container"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306092351598.jpg" onerror="this.onerror=null;this.src='/carpet/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">ZeanHike</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/carpet/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/carpet/tags/"><div class="headline">标签</div><div class="length-num">1</div></a><a href="/carpet/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/CyberIKUN"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/CyberIKUN" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:774781684@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a><a class="social-icon" href="https://twitter.com/ZeanHike" target="_blank" title="Twitter"><i class="fa-brands fa-twitter" style="color: #4c79e1;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">随缘更新自己对漏洞方面的理解和挖掘过程中产生的经验~</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Shiro-%E5%85%A8%E7%B3%BB%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-%E6%88%AA%E8%87%B320230331"><span class="toc-text">Shiro(全系漏洞分析-截至20230331)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2010-3863"><span class="toc-text">CVE-2010-3863</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2014-0074-x2F-Shiro-460"><span class="toc-text">CVE-2014-0074&#x2F;Shiro-460</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-1"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-1"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-1"><span class="toc-text">分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2016-4437-x2F-Shiro-550"><span class="toc-text">CVE-2016-4437&#x2F;Shiro-550</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-2"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-2"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-2"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-1"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2016-6802"><span class="toc-text">CVE-2016-6802</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-3"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-3"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-3"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-2"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2019-12422-x2F-Shiro-721"><span class="toc-text">CVE-2019-12422&#x2F;Shiro-721</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-4"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-4"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-4"><span class="toc-text">分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2020-1957-x2F-Shiro-682"><span class="toc-text">CVE-2020-1957&#x2F;Shiro-682</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-5"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-5"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-5"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-3"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2020-11989-x2F-Shiro-782"><span class="toc-text">CVE-2020-11989&#x2F;Shiro-782</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-6"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-6"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-6"><span class="toc-text">分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%BB%95%E8%BF%87"><span class="toc-text">第一个绕过</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E4%B8%AA%E7%BB%95%E8%BF%87"><span class="toc-text">第二个绕过</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-4"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2020-13933"><span class="toc-text">CVE-2020-13933</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-7"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-7"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-7"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-5"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2020-17510"><span class="toc-text">CVE-2020-17510</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-8"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-8"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-8"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-6"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2020-17523"><span class="toc-text">CVE-2020-17523</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-9"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-9"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-9"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-7"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2021-41303-x2F-Shiro-825"><span class="toc-text">CVE-2021-41303&#x2F;Shiro-825</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-10"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-10"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-10"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-8"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2022-32532"><span class="toc-text">CVE-2022-32532</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-11"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-11"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-11"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-9"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2022-40664"><span class="toc-text">CVE-2022-40664</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-12"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-12"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-12"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-10"><span class="toc-text">修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CVE-2023-22602"><span class="toc-text">CVE-2023-22602</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0-13"><span class="toc-text">漏洞描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E8%8C%83%E5%9B%B4-13"><span class="toc-text">适用范围</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-13"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D-11"><span class="toc-text">修复</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AEant%E5%8C%B9%E9%85%8D%E8%B7%AF%E5%BE%84"><span class="toc-text">设置ant匹配路径</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%87%E7%BA%A7%E7%89%88%E6%9C%AC"><span class="toc-text">升级版本</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/carpet/2023/06/09/WebLogic/" title="WebLogic全系漏洞分析截至20230609"><img src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306091851837.jpg" onerror="this.onerror=null;this.src='/carpet/img/404.jpg'" alt="WebLogic全系漏洞分析截至20230609"/></a><div class="content"><a class="title" href="/carpet/2023/06/09/WebLogic/" title="WebLogic全系漏洞分析截至20230609">WebLogic全系漏洞分析截至20230609</a><time datetime="2023-06-09T10:49:08.000Z" title="发表于 2023-06-09 18:49:08">2023-06-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/carpet/2023/04/15/XStream/" title="XStream漏洞全系分析(截至2023/4/15)"><img src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101608758.jpg" onerror="this.onerror=null;this.src='/carpet/img/404.jpg'" alt="XStream漏洞全系分析(截至2023/4/15)"/></a><div class="content"><a class="title" href="/carpet/2023/04/15/XStream/" title="XStream漏洞全系分析(截至2023/4/15)">XStream漏洞全系分析(截至2023/4/15)</a><time datetime="2023-04-15T10:49:08.000Z" title="发表于 2023-04-15 18:49:08">2023-04-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/carpet/2023/03/31/Shiro/" title="Shiro(全系漏洞分析-截至20230331)"><img src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101021498.png" onerror="this.onerror=null;this.src='/carpet/img/404.jpg'" alt="Shiro(全系漏洞分析-截至20230331)"/></a><div class="content"><a class="title" href="/carpet/2023/03/31/Shiro/" title="Shiro(全系漏洞分析-截至20230331)">Shiro(全系漏洞分析-截至20230331)</a><time datetime="2023-03-31T10:49:08.000Z" title="发表于 2023-03-31 18:49:08">2023-03-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/carpet/2023/03/25/FastJSON/" title="FastJSON(全系漏洞分析-截至2023/03/25)"><img src="https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101036966.png" onerror="this.onerror=null;this.src='/carpet/img/404.jpg'" alt="FastJSON(全系漏洞分析-截至2023/03/25)"/></a><div class="content"><a class="title" href="/carpet/2023/03/25/FastJSON/" title="FastJSON(全系漏洞分析-截至2023/03/25)">FastJSON(全系漏洞分析-截至2023/03/25)</a><time datetime="2023-03-25T10:49:08.000Z" title="发表于 2023-03-25 18:49:08">2023-03-25</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://cdn.jsdelivr.net/gh/cyberikun/picture@latest/img/202306101021498.png')"><div id="footer-wrap"><div class="copyright">&copy;2023 By ZeanHike</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/carpet/js/utils.js"></script><script src="/carpet/js/main.js"></script><script src="/carpet/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>function loadGitalk () {
+  function initGitalk () {
+    var gitalk = new Gitalk(Object.assign({
+      clientID: 'fe8dfe66cc01b0567d44',
+      clientSecret: '68188c5d5426523e7e34480cc1ceb47b2bb9830f',
+      repo: 'carpet',
+      owner: 'cyberikun',
+      admin: ['cyberikun'],
+      id: '573f62c0e937dcf24096ae3cb79dc2de',
+      updateCountCallback: commentCount
+    },null))
+
+    gitalk.render('gitalk-container')
+  }
+
+  if (typeof Gitalk === 'function') initGitalk()
+  else {
+    getCSS('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css')
+    getScript('https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.js').then(initGitalk)
+  }
+}
+
+function commentCount(n){
+  let isCommentCount = document.querySelector('#post-meta .gitalk-comment-count')
+  if (isCommentCount) {
+    isCommentCount.textContent= n
+  }
+}
+
+if ('Gitalk' === 'Gitalk' || !false) {
+  if (false) btf.loadComment(document.getElementById('gitalk-container'), loadGitalk)
+  else loadGitalk()
+} else {
+  function loadOtherComment () {
+    loadGitalk()
+  }
+}</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/carpet/js/search/local-search.js"></script></div></div></body></html>
