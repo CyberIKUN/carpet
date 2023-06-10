@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>WebLogic全系漏洞分析截至20230609</title>
-    <url>/2023/06/09/WebLogic/</url>
+    <url>/carpet/2023/06/09/WebLogic/</url>
     <content><![CDATA[<h1 id="WebLogic"><a href="#WebLogic" class="headerlink" title="WebLogic"></a>WebLogic</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>Oracle融合中间件（Oracle Fusion Middleware）：Oracle融合中间件是一系列基于标准的软件产品，涵盖了一系列工具和服务：从Java EE和开发人员工具，到集成服务、身份管理、商业智能和协作。Oracle融合中间件为开发、部署和管理提供完整的支持。</p>
 <p>概括成九个字就是，一堆软件产品和服务。</p>
 <p>图示如下：</p>
